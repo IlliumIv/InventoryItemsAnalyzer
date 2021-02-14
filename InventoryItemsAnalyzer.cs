@@ -132,6 +132,17 @@ namespace InventoryItemsAnalyzer
                 var normalInventoryItems = _ingameState.IngameUi.InventoryPanel[InventoryIndex.PlayerInventory]
                     .VisibleInventoryItems;
 
+                try
+                {
+                    var ritualItems = _ingameState.IngameUi.RitualWindow.Items;
+
+                    normalInventoryItems = normalInventoryItems.Concat(ritualItems).ToList();
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+
                 var temp = normalInventoryItems.Count(t => t.Item?.GetComponent<Mods>()?.Identified == true);
 
                 //LogMessage(normalInventoryItems.Count.ToString() + " " + CountInventory.ToString() + " // " + temp .ToString() + " " + idenf.ToString(), 3f);
@@ -849,7 +860,7 @@ namespace InventoryItemsAnalyzer
                     {
                         chaosValue = Convert.ToSingle((string) line?["chaosValue"], formatter);
 
-                        if (chaosValue < Settings.ChaosProphecy.Value)
+                        if (chaosValue < Settings.ChaosDivCard.Value)
                             result.Add((string) line?["name"]);
                     }
                 }
