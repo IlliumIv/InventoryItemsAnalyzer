@@ -1,4 +1,4 @@
-Depriciated (hard to maintain). Replaced with **EZV** https://yadi.sk/d/tv6dvS2AUClbxA or https://github.com/vadash/EZVendor
+Replaced with **EZV** https://yadi.sk/d/tv6dvS2AUClbxA or https://github.com/vadash/EZVendor
 
 ![ezv1](https://user-images.githubusercontent.com/1397582/114292276-169b9900-9a96-11eb-8c49-18ff769924d6.png)
 
