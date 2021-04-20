@@ -1,18 +1,5 @@
-# InventoryItemsAnalyzer
-plugin "Inventory Items Analyzer" for ExileApi.
+Replaced with **EZV** https://yadi.sk/d/tv6dvS2AUClbxA or https://github.com/vadash/EZVendor
 
-Remember, remove the old config file before updating to the newer version of this plugin. You can find this in ...\PoeHelper\config\global\InventoryItemsAnalyzer_settings.json .
+![ezv1](https://user-images.githubusercontent.com/1397582/114292276-169b9900-9a96-11eb-8c49-18ff769924d6.png)
 
-### How to install:
-1. Download this.
-2. Unzip and put in ...\PoeHelper\Plugins\Compiled\
-3. Rename folder "InventoryItemsAnalyzer-master" to "InventoryItemsAnalyzer".
-
-### In progress:
-(Move the mouse the item)
-
-![alt text](https://github.com/MustBePony/InventoryItemsAnalyzer/blob/master/demo.png?raw=true)
-
-Draws image for good/veiled item.
-Draws border for items with influence or good BaseType. You can set min ItemLevel for this.
-You can set hotkeys for autovendor trash items.
+![ezv2](https://user-images.githubusercontent.com/1397582/114292244-ae4cb780-9a95-11eb-96f3-fa6395cdd308.gif)
