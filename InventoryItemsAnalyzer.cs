@@ -44,6 +44,7 @@ namespace InventoryItemsAnalyzer
         private HashSet<string> _goodBaseTypes;
         private HashSet<string> _shitDivCards;
         private HashSet<string> _shitUniques;
+        private HashSet<string> _goodProphecies;
 
         public InventoryItemsAnalyzer()
         {
@@ -129,24 +130,38 @@ namespace InventoryItemsAnalyzer
 
             if (wait > _wait.Ticks)
             {
-                var normalInventoryItems = _ingameState.IngameUi.InventoryPanel[InventoryIndex.PlayerInventory]
-                    .VisibleInventoryItems;
-
-                var temp = normalInventoryItems.Count(t => t.Item?.GetComponent<Mods>()?.Identified == true);
+                IList<NormalInventoryItem> allItems = GetVisibleItems() ;
+                
+                var temp = allItems.Count(t => t.Item?.GetComponent<Mods>()?.Identified == true);
 
                 //LogMessage(normalInventoryItems.Count.ToString() + " " + CountInventory.ToString() + " // " + temp .ToString() + " " + idenf.ToString(), 3f);
 
-                if (normalInventoryItems.Count != _countInventory || temp != _idenf)
+                if (allItems.Count != _countInventory || temp != _idenf)
                 {
-                    ScanInventory(normalInventoryItems);
-                    _countInventory = normalInventoryItems.Count;
-                    _idenf = temp;
+                    ScanInventory(allItems);
+                    _countInventory = allItems.Count;
+                    _idenf          = temp;
                 }
 
                 _renderWait = DateTime.Now;
             }
         }
 
+        private IList<NormalInventoryItem> GetVisibleItems()
+        {
+            var normalInventoryItems = _ingameState.IngameUi.InventoryPanel[InventoryIndex.PlayerInventory]
+                .VisibleInventoryItems;
+
+            if (_ingameState.IngameUi.RitualWindow.IsVisible)
+            {
+                IList<NormalInventoryItem> ritualItems = _ingameState.IngameUi.RitualWindow.Items;
+
+                return normalInventoryItems.Concat(ritualItems).ToList();
+            }
+
+            return normalInventoryItems;
+        }
+        
         #region Scan Inventory
 
         private void ScanInventory(IList<NormalInventoryItem> normalInventoryItems)
@@ -220,6 +235,17 @@ namespace InventoryItemsAnalyzer
 
                     #endregion
 
+                    #region Prophecy
+
+                    if (item.HasComponent<Prophecy>())
+                    {
+                        var prop = item.GetComponent<Prophecy>();
+
+                        if (_goodProphecies.Contains(prop?.DatProphecy?.Name)) _goodItemsPos.Add(drawRect);
+                    }
+
+                    #endregion
+                    
                     #region Div Card
 
                     if (bit.ClassName.Equals("DivinationCard"))
@@ -744,6 +770,7 @@ namespace InventoryItemsAnalyzer
             {
                 _shitUniques = new HashSet<string>();
                 _shitDivCards = new HashSet<string>();
+                _goodProphecies = new HashSet<string>();
 
                 IFormatProvider formatter = new NumberFormatInfo {NumberDecimalSeparator = "."};
                 float chaosValue;
@@ -820,22 +847,22 @@ namespace InventoryItemsAnalyzer
 
                 #region DivCard
 
-                string url3;
+                string urlDiv;
 
                 switch (Settings.League.Value)
                 {
                     case "Temp SC":
-                        url3 = @"https://poe.ninja/api/data/itemoverview?league=" + LEAGUE_NAME +
+                        urlDiv = @"https://poe.ninja/api/data/itemoverview?league=" + LEAGUE_NAME +
                                @"&type=DivinationCard&language=en";
                         break;
 
                     case "Temp HC":
-                        url3 = @"https://poe.ninja/api/data/itemoverview?league=Hardcore+" + LEAGUE_NAME +
+                        urlDiv = @"https://poe.ninja/api/data/itemoverview?league=Hardcore+" + LEAGUE_NAME +
                                @"&type=DivinationCard&language=en";
                         break;
 
                     default:
-                        url3 = "";
+                        urlDiv = "";
                         break;
                 }
 
@@ -843,13 +870,13 @@ namespace InventoryItemsAnalyzer
 
                 using (var wc = new WebClient())
                 {
-                    var json = wc.DownloadString(url3);
+                    var json = wc.DownloadString(urlDiv);
                     var o = JObject.Parse(json);
                     foreach (var line in o?["lines"])
                     {
                         chaosValue = Convert.ToSingle((string) line?["chaosValue"], formatter);
 
-                        if (chaosValue < Settings.ChaosProphecy.Value)
+                        if (chaosValue < Settings.ChaosDivCard.Value)
                             result.Add((string) line?["name"]);
                     }
                 }
@@ -858,6 +885,46 @@ namespace InventoryItemsAnalyzer
 
                 #endregion
 
+                #region Prophecy
+                
+                string urlProh;
+
+                switch (Settings.League.Value)
+                {
+                    case "Temp SC":
+                        urlProh = @"https://poe.ninja/api/data/itemoverview?league=" + LEAGUE_NAME +
+                                  @"&type=Prophecy&language=en";
+                        break;
+
+                    case "Temp HC":
+                        urlProh = @"https://poe.ninja/api/data/itemoverview?league=Hardcore+" + LEAGUE_NAME +
+                                  @"&type=Prophecy&language=en";
+                        break;
+
+                    default:
+                        urlProh = "";
+                        break;
+                }
+
+                result.Clear();
+
+                using (var wc = new WebClient())
+                {
+                    var json = wc.DownloadString(urlProh);
+                    var o = JObject.Parse(json);
+                    foreach (var line in o?["lines"])
+                    {
+                        chaosValue = Convert.ToSingle((string) line?["chaosValue"], formatter);
+
+                        if (chaosValue >= Settings.ChaosProphecy.Value)
+                            result.Add((string) line?["name"]);
+                    }
+                }
+
+                _goodProphecies = result.ToHashSet();
+                
+                #endregion
+                
                 #region Test
 
                 // string text = "";
